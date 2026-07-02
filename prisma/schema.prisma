@@ -1,0 +1,86 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Get a free hosted Postgres database in seconds: `npx create-db`
+
+generator client {
+  provider = "prisma-client"
+  output   = "../generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model Menu {
+  id         String     @id @default(uuid()) @db.Uuid
+  name       String
+  // category   String
+  merchantId String
+  isActive   Boolean    @default(false)
+  menuItems  MenuItem[]
+  createdAt  DateTime   @default(now())
+  updatedAt  DateTime   @updatedAt
+
+  @@map("menu")
+}
+
+model MenuCategory {
+  id        String     @id @default(uuid()) @db.Uuid
+  name      String
+  menuItems MenuItem[]
+
+  @@map("menu_category")
+}
+
+model MenuItem {
+  id          String  @id @default(uuid()) @db.Uuid
+  name        String
+  description String?
+
+  categoryId String       @db.Uuid
+  category   MenuCategory @relation(fields: [categoryId], references: [id])
+
+  price       Float
+  menuId      String   @db.Uuid
+  isAvailable Boolean  @default(false)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  menu       Menu        @relation(fields: [menuId], references: [id])
+  orderItems OrderItem[]
+
+  @@map("menu_item")
+}
+
+model Order {
+  id          String @id @default(uuid()) @db.Uuid
+  orderNumber Int    @unique @default(autoincrement())
+  status      String // received, preparing, ready, completed
+  totalPrice  Float
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  orderItems OrderItem[]
+
+  @@map("order")
+}
+
+model OrderItem {
+  id               String  @id @default(uuid()) @db.Uuid
+  quantity         Int
+  remark           String?
+  priceAtOrderTime Float
+
+  menuItemId String   @db.Uuid
+  menuItem   MenuItem @relation(fields: [menuItemId], references: [id])
+
+  orderId String @db.Uuid
+  order   Order  @relation(fields: [orderId], references: [id])
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("order_item")
+}

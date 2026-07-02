@@ -1,0 +1,48 @@
+{
+  "name": "consumer-order",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "dev": "tsx src/app.ts",
+    "dev:worker": "tsx src/worker.ts",
+    "build": "rm -rf dist && tsx esbuild.config.ts",
+    "build:watch": "rm -rf dist && tsx esbuild.config.ts --watch",
+    "db:setup": "./scripts/setup-db.sh",
+    "db:seed": "prisma db seed",
+    "prisma:migrate": "prisma migrate dev --name init",
+    "prisma:generate": "prisma generate",
+    "db:down": "docker compose down -v && rm -rf ./prisma/migrations"
+  },
+  "engines": {
+    "node": "^24.0"
+  },
+  "type": "module",
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "packageManager": "pnpm@10.32.1",
+  "dependencies": {
+    "@prisma/adapter-pg": "^7.8.0",
+    "@prisma/client": "^7.8.0",
+    "amqplib": "^2.0.1",
+    "dotenv": "^17.4.2",
+    "express": "^5.2.1",
+    "pg": "^8.22.0",
+    "pino": "^10.3.1",
+    "zod": "^4.4.3"
+  },
+  "devDependencies": {
+    "@faker-js/faker": "^10.5.0",
+    "@types/amqplib": "^0.10.8",
+    "@types/express": "^5.0.6",
+    "@types/express-serve-static-core": "^5.1.1",
+    "@types/node": "^26.0.1",
+    "@types/pg": "^8.20.0",
+    "@types/qs": "^6.15.1",
+    "esbuild": "^0.28.1",
+    "prisma": "^7.8.0",
+    "tsx": "^4.22.4",
+    "typescript": "^6.0.3"
+  }
+}
