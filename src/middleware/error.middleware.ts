@@ -1,4 +1,5 @@
 import { AppError } from "@/lib/errors";
+import { logger } from "@/lib/logger";
 import { Request, Response, NextFunction } from "express";
 
 export function errorMiddleware(
@@ -13,8 +14,9 @@ export function errorMiddleware(
     });
   }
 
+  logger.error({ err, path: req.path, method: req.method }, "Unhandled error");
+
   return res.status(500).json({
     message: "Internal Server Error",
-    error: err.message,
   });
 }

@@ -5,7 +5,7 @@
   "main": "index.js",
   "scripts": {
     "dev": "tsx src/app.ts",
-    "dev:worker": "tsx src/worker.ts",
+    "dev:worker": "tsx src/workers/worker.ts",
     "build": "rm -rf dist && tsx esbuild.config.ts",
     "build:watch": "rm -rf dist && tsx esbuild.config.ts --watch",
     "db:setup": "./scripts/setup-db.sh",
