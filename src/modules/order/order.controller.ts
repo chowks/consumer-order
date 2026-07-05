@@ -6,8 +6,9 @@ import {
   updateOrderStatusParamsSchema,
 } from "./order.schema";
 import { OrderService } from "./order.service";
-import { ValidationError } from "@/lib/errors";
+import { NotFoundError, ValidationError } from "@/lib/errors";
 import { publishToQueue, QUEUES } from "@/lib/queue";
+import { menuItemRepository } from "../menu/menu-item/menu-item.repository";
 
 export const OrderController = {
   getOrder: asyncHandler(async (req, res) => {
@@ -25,10 +26,27 @@ export const OrderController = {
       throw new ValidationError("Invalid body");
     }
 
-    // here we validate if each of the order item exists and available from menu item
-    await OrderService.validateOrderItemsAvailability(parsed.data.orderItems);
+    const menuItemIds = parsed.data.orderItems?.map((item) => item.menuItemId);
 
-    const order = await OrderService.create(parsed.data);
+    const [menuItems, count] = await menuItemRepository.findMany({
+      where: {
+        id: {
+          in: menuItemIds,
+        },
+      },
+    });
+
+    if (count <= 0) {
+      throw new NotFoundError("No available menu item found");
+    }
+
+    // here we validate if each of the order item exists and available from menu item
+    await OrderService.validateOrderItemsAvailability(
+      menuItems,
+      parsed.data.orderItems,
+    );
+
+    const order = await OrderService.create(menuItems, parsed.data);
 
     // here is the async process after creating an order
     await publishToQueue(QUEUES.ORDER_CREATED, order);

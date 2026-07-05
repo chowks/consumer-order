@@ -1,3 +1,4 @@
+import { MenuItem } from "@generated/prisma/client";
 import { menuItemRepository } from "../menu/menu-item/menu-item.repository";
 import { OrderRepository } from "./order.repository";
 import {
@@ -22,22 +23,9 @@ export const OrderService = {
     return order;
   },
   validateOrderItemsAvailability: async (
+    menuItems: MenuItem[],
     orderItems: CreateOrderBody["orderItems"],
   ) => {
-    const menuItemIds = orderItems.map((item) => item.menuItemId);
-
-    const [menuItems, count] = await menuItemRepository.findMany({
-      where: {
-        id: {
-          in: menuItemIds,
-        },
-      },
-    });
-
-    if (count <= 0) {
-      throw new NotFoundError("No available menu item found");
-    }
-
     const dbMenuItemIdMapAvailability = new Map(
       menuItems.map((menu) => [menu.id, menu.isAvailable]),
     );
@@ -51,16 +39,10 @@ export const OrderService = {
       }
     }
   },
-  create: async (input: CreateOrderBody) => {
+  create: async (menuItems: MenuItem[], input: CreateOrderBody) => {
     // here we always get the latest menu price from DB.
     // there is a risk where the customer might be paying different amount than they see from the UI.
     // but this can be resolved by adding a checkout page to show the latest response.
-    const menuItemIds = input.orderItems.map((item) => item.menuItemId);
-
-    const [menuItems] = await menuItemRepository.findMany({
-      where: { id: { in: menuItemIds } },
-    });
-
     const menuItemPriceMap = new Map(
       menuItems.map((item) => [item.id, item.price]),
     );
